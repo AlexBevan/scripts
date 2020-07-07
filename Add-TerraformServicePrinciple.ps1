@@ -46,9 +46,9 @@ function Add-TerraformServicePrinciple {
         }
         $apiUrl = "https://graph.microsoft.com/beta/oauth2PermissionGrants"
         Try {
-            $r = Invoke-RestMethod -Uri $apiUrl -Headers @{Authorization = "Bearer $($token)" }  -Method POST -Body $($body | convertto-json) -ContentType "application/json" | out-null
+            $r = Invoke-RestMethod -Uri $apiUrl -Headers @{Authorization = "Bearer $($token)" }  -Method POST -Body $($body | convertto-json) -ContentType "application/json"
            }
-           catch {Failure}
+        catch {Failure}
     }
     END
     {
