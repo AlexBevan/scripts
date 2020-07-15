@@ -66,9 +66,12 @@ function Add-TerraformServicePrinciple {
         remove-item ./testjson.json -force  
         az ad app permission admin-consent --id $sp.appId
 
+        $apiUrl = 'https://graph.microsoft.com/v1.0/directoryRoles/'
+        $Data = Invoke-RestMethod -Headers @{Authorization = "Bearer $($token)"} -Uri $apiUrl -Method Get
+        $RoleID = (($Data | Select-Object Value).Value | Where-Object {$_.displayName -eq "User Account Administrator"} | Select-Object id).id
 
-        $payload = (@{"@odata.id" = "https://graph.microsoft.com/v1.0/directoryObjects/$sp_ob_id"} | ConvertTo-Json )
-        $apiUrl = 'https://graph.microsoft.com/v1.0/directoryRoles/15d35d50-7c4f-4a3c-af7e-bfd3b229d3c3/members/$ref'
+        $payload = (@{“@odata.id” = “https://graph.microsoft.com/v1.0/directoryObjects/$sp_ob_id”} | ConvertTo-Json )
+        $apiUrl = "https://graph.microsoft.com/v1.0/directoryRoles/$RoleID/members/\`$ref"
         $payload = $payload -replace "`"", "\`""
         az rest --method post --uri $apiUrl --body $payload
 
@@ -82,4 +85,3 @@ function Add-TerraformServicePrinciple {
         
         
     }
-
