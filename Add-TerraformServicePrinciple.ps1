@@ -34,21 +34,6 @@ function Add-TerraformServicePrinciple {
         $token = (az account get-access-token --resource=https://graph.microsoft.com | convertfrom-json).accessToken
 
         $resourceID = (az ad sp show --id 00000003-0000-0000-c000-000000000000 | convertfrom-json).objectId
-        
-        # $body = @{
-        #     clientId    = $sp_ob_id
-        #     consentType = "AllPrincipals"
-        #     principalId = $null
-        #     resourceId  = $resourceID
-        #     scope       = "Application.ReadWrite.All Application.ReadWrite.OwnedBy Directory.ReadWrite.All Group.ReadWrite.All"
-        #     startTime   = "2019-10-19T10:37:00Z"
-        #     expiryTime  = "2019-10-19T10:37:00Z"
-        # }
-        # $apiUrl = "https://graph.microsoft.com/beta/oauth2PermissionGrants"
-        # Try {
-        #     $r = Invoke-RestMethod -Uri $apiUrl -Headers @{Authorization = "Bearer $($token)" }  -Method POST -Body $($body | convertto-json) -ContentType "application/json"
-        #    }
-        # catch {Failure}
 
         $json = @'
 [
