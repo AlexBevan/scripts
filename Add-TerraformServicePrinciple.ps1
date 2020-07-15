@@ -81,6 +81,13 @@ function Add-TerraformServicePrinciple {
         remove-item ./testjson.json -force  
         az ad app permission admin-consent --id $sp.appId
 
+
+        $payload = (@{“@odata.id” = “https://graph.microsoft.com/v1.0/directoryObjects/$sp_ob_id”} | ConvertTo-Json )
+        $apiUrl = 'https://graph.microsoft.com/v1.0/directoryRoles/15d35d50-7c4f-4a3c-af7e-bfd3b229d3c3/members/$ref'
+        $payload = $payload -replace "`"", "\`""
+        az rest --method post --uri $apiUrl --body $payload
+
+    
     }
     END
     {
