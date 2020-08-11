@@ -21,7 +21,9 @@ function Add-TerraformServicePrinciple {
     {
         $ourObject = New-Object -TypeName psobject 
         $sp = az ad sp create-for-rbac --skip-assignment --name $name | ConvertFrom-Json
+        start-sleep 10
         $sp_ob_id = (az ad sp show --id $sp.appId | convertfrom-json).objectId
+
     }
     
     PROCESS
@@ -32,6 +34,7 @@ function Add-TerraformServicePrinciple {
         $ourObject | Add-Member -MemberType NoteProperty -Name CLIENT_OBJECT_ID -Value $sp_ob_id
 
         $token = (az account get-access-token --resource=https://graph.microsoft.com | convertfrom-json).accessToken
+        
 
         $resourceID = (az ad sp show --id 00000003-0000-0000-c000-000000000000 | convertfrom-json).objectId
 
@@ -62,9 +65,12 @@ function Add-TerraformServicePrinciple {
 '@
         out-file test.json
         Add-Content -Path testjson.json -Value $json
+        write-host "Add SP to GraphAPI"
         $api = (az ad app update --id $sp.appId --required-resource-accesses testjson.json)
         remove-item ./testjson.json -force  
+        write-host "Consent GraphAPI access"
         az ad app permission admin-consent --id $sp.appId
+        start-sleep 10
 
         $apiUrl = 'https://graph.microsoft.com/v1.0/directoryRoles/'
         $Data = Invoke-RestMethod -Headers @{Authorization = "Bearer $($token)"} -Uri $apiUrl -Method Get
@@ -73,15 +79,11 @@ function Add-TerraformServicePrinciple {
         $payload = (@{“@odata.id” = “https://graph.microsoft.com/v1.0/directoryObjects/$sp_ob_id”} | ConvertTo-Json )
         $apiUrl = "https://graph.microsoft.com/v1.0/directoryRoles/$RoleID/members/\`$ref"
         $payload = $payload -replace "`"", "\`""
+        write-host "Add user to User Account Administrator role"
         az rest --method post --uri $apiUrl --body $payload
-
-    
     }
     END
     {
         return $ourObject
-    }
-        
-        
-        
+    }   
     }
